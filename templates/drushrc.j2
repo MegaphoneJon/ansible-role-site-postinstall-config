@@ -1,0 +1,7 @@
+<?php
+$options['l'] = '{{ primary_url }}';
+$options['r'] = '{{ webroot }}';
+$altrc = getcwd() . '/drushrc.php';
+if (file_exists($altrc) && $altrc != __FILE__) {
+  include_once $altrc;
+}

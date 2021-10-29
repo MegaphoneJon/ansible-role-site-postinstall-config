@@ -1,0 +1,68 @@
+# All miscellaneous tasks that must happen post-install.
+- name: Set a .htaccess
+  copy:
+    src: files/.htaccess
+    dest: "{{ webroot }}/.htaccess"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  # FIXME: This isn't compatible with nosudo, and probably isn't necessary.
+  become_user: root
+  when: cms == 'WordPress'
+
+- name: Ensure drush dir exists
+  file: 
+    path: "{{ gitroot }}/drush"
+    state: directory
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: cms == 'Drupal8'    
+
+- name: Set a drush.yml
+  template: 
+    src: templates/drush.yml.j2
+    dest: "{{ gitroot }}/drush/drush.yml"
+    owner: "{{ run_as_user }}"
+    group: "{{ run_as_user }}"
+  when: cms == 'Drupal8'
+
+- block:
+  - name: Set a drushrc.php
+    template:
+      src: templates/drushrc.j2
+      dest: "{{ webroot }}/sites/default/drushrc.php"
+      owner: "{{ run_as_user }}"
+      group: "{{ run_as_user }}"
+    become_user: root
+
+  - name: Expand the number of log messages to keep
+    command: "drush --root={{ webroot }} vset dblog_row_limit 1000000"
+    become_user: "{{ run_as_user }}"
+
+  - name: Don't print errors to screen
+    command: "drush8 --root={{ webroot }} vset error_level 0"
+    become_user: "{{ run_as_user }}"
+
+  - name: Enable role_watchdog
+    command: "drush8 --root={{ webroot }} en -y role_watchdog"
+    args:
+      creates: "{{ webroot }}/sites/all/modules/role_watchdog"
+    become_user: "{{ run_as_user }}"
+
+  - name: Enable clear_password_field
+    command: "drush8 --root={{ webroot }} en -y clear_password_field"
+    args:
+      creates: "{{ webroot }}/sites/all/modules/clear_password_field"
+    become_user: "{{ run_as_user }}"
+
+  - name: Enable hide_php_fatal_error 
+    command: "drush8 --root={{ webroot }} en -y hide_php_fatal_error"
+    args:
+      creates: "{{ webroot }}/sites/all/modules/hide_php_fatal_error"
+    become_user: "{{ run_as_user }}"
+
+  - name: Enable remove_generator 
+    command: "drush8 --root={{ webroot }} en -y remove_generator"
+    args:
+      creates: "{{ webroot }}/sites/all/modules/remove_generator"
+    become_user: "{{ run_as_user }}"
+  when: cms == 'Drupal'
