@@ -33,6 +33,7 @@
       owner: "{{ run_as_user }}"
       group: "{{ run_as_user }}"
     become_user: root
+    tags: drushrc.php
 
   - name: Expand the number of log messages to keep
     command: "drush --root={{ webroot }} vset dblog_row_limit 1000000"
