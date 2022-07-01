@@ -1,14 +1,4 @@
 # All miscellaneous tasks that must happen post-install.
-- name: Set a .htaccess
-  copy:
-    src: files/.htaccess
-    dest: "{{ webroot }}/.htaccess"
-    owner: "{{ run_as_user }}"
-    group: "{{ run_as_user }}"
-  # FIXME: This isn't compatible with nosudo, and probably isn't necessary.
-  become_user: root
-  when: cms == 'WordPress'
-
 - name: Ensure drush dir exists
   file: 
     path: "{{ gitroot }}/drush"
